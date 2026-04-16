@@ -1,0 +1,16 @@
+{
+  "name": "multi-researcher-bi",
+  "version": "1.0.0",
+  "description": "자연어 질문 → 4명의 리서처 에이전트 병렬 탐색 → 편집자 에이전트 통합 답변",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.24.0",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "papaparse": "^5.5.2"
+  }
+}

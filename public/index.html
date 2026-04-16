@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>멀티 리서처 BI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="header-brand">
+        <span class="brand-mark"></span>
+        <h1 class="brand-title">멀티 리서처 BI</h1>
+      </div>
+      <span class="header-tag">Insurance &amp; Investment Analytics</span>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="container">
+
+    <!-- SEARCH SECTION -->
+    <section class="search-section">
+      <div class="search-box">
+        <textarea
+          id="query-input"
+          class="query-input"
+          placeholder="보험·투자 데이터에 대해 자연어로 질문하세요..."
+          rows="3"
+        ></textarea>
+        <button id="analyze-btn" class="analyze-btn">
+          <span class="btn-label">분석</span>
+          <span class="btn-spinner" hidden></span>
+        </button>
+      </div>
+      <div class="sample-questions">
+        <span class="sample-label">샘플 질문</span>
+        <div class="sample-btns">
+          <button class="sample-btn" data-q="30대 남성 고객이 가장 많이 가입한 상품 카테고리는?">30대 남성 가입 카테고리</button>
+          <button class="sample-btn" data-q="최근 12개월 손해율이 가장 악화된 보험사는?">손해율 악화 보험사</button>
+          <button class="sample-btn" data-q="적극형 고객의 평균 월 투자 가용금액은?">적극형 투자 여력</button>
+          <button class="sample-btn" data-q="자녀 둘 이상 가구가 관심 있는 보장은?">자녀가구 관심 보장</button>
+          <button class="sample-btn" data-q="내일 주가가 오를까?">내일 주가 예측</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- QUERY PLAN TOGGLE -->
+    <section class="plan-section" id="plan-section" hidden>
+      <button class="plan-toggle" id="plan-toggle" aria-expanded="false">
+        <span class="toggle-icon">▶</span>
+        <span>AI 사고과정 보기</span>
+      </button>
+      <div class="plan-body" id="plan-body" hidden>
+        <pre class="plan-json" id="plan-json"></pre>
+      </div>
+    </section>
+
+    <!-- WELCOME MESSAGE (초기 상태에서만 표시) -->
+    <section class="welcome-section" id="welcome-section">
+      <div class="welcome-inner">
+        <div class="welcome-icon-row">
+          <span class="welcome-dot"></span>
+          <span class="welcome-dot"></span>
+          <span class="welcome-dot"></span>
+          <span class="welcome-dot"></span>
+        </div>
+        <p class="welcome-desc">질문을 입력하면 4명의 AI 리서처가 보험·투자 데이터를 병렬로 분석하고,<br>편집자 에이전트가 통합 답변과 차트를 생성합니다.</p>
+        <div class="welcome-agents">
+          <span class="welcome-agent">📦 상품 리서처</span>
+          <span class="welcome-sep">·</span>
+          <span class="welcome-agent">📋 정책 리서처</span>
+          <span class="welcome-sep">·</span>
+          <span class="welcome-agent">📊 손해율 리서처</span>
+          <span class="welcome-sep">·</span>
+          <span class="welcome-agent">💰 투자 리서처</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- RESEARCHER CARDS -->
+    <section class="researchers-section" id="researchers-section" hidden>
+      <div class="researchers-grid">
+
+        <div class="researcher-card" id="card-product_researcher" data-state="idle">
+          <div class="card-icon">📦</div>
+          <div class="card-info">
+            <div class="card-name">상품 리서처</div>
+            <div class="card-id">product_researcher</div>
+          </div>
+          <div class="card-status-badge">대기</div>
+          <div class="card-summary" id="summary-product_researcher" hidden></div>
+          <div class="card-pulse"></div>
+        </div>
+
+        <div class="researcher-card" id="card-policy_researcher" data-state="idle">
+          <div class="card-icon">📋</div>
+          <div class="card-info">
+            <div class="card-name">정책 리서처</div>
+            <div class="card-id">policy_researcher</div>
+          </div>
+          <div class="card-status-badge">대기</div>
+          <div class="card-summary" id="summary-policy_researcher" hidden></div>
+          <div class="card-pulse"></div>
+        </div>
+
+        <div class="researcher-card" id="card-loss_ratio_researcher" data-state="idle">
+          <div class="card-icon">📊</div>
+          <div class="card-info">
+            <div class="card-name">손해율 리서처</div>
+            <div class="card-id">loss_ratio_researcher</div>
+          </div>
+          <div class="card-status-badge">대기</div>
+          <div class="card-summary" id="summary-loss_ratio_researcher" hidden></div>
+          <div class="card-pulse"></div>
+        </div>
+
+        <div class="researcher-card" id="card-investment_researcher" data-state="idle">
+          <div class="card-icon">💰</div>
+          <div class="card-info">
+            <div class="card-name">투자 리서처</div>
+            <div class="card-id">investment_researcher</div>
+          </div>
+          <div class="card-status-badge">대기</div>
+          <div class="card-summary" id="summary-investment_researcher" hidden></div>
+          <div class="card-pulse"></div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- EDITOR ANSWER -->
+    <section class="editor-section" id="editor-section" hidden>
+
+      <!-- Guard refusal (답변 불가) -->
+      <div class="refusal-box" id="refusal-box" hidden>
+        <span class="refusal-icon">⚠️</span>
+        <p class="refusal-msg" id="refusal-msg"></p>
+      </div>
+
+      <!-- Stream / API error -->
+      <div class="error-box" id="error-box" hidden>
+        <span class="error-icon">⛔</span>
+        <p class="error-msg" id="error-msg"></p>
+      </div>
+
+      <!-- Synthesizing indicator -->
+      <div class="synthesizing-bar" id="synthesizing-bar" hidden>
+        <span class="synth-dot"></span>
+        <span class="synth-dot"></span>
+        <span class="synth-dot"></span>
+        <span class="synth-label">편집자가 통합 답변을 작성 중입니다...</span>
+      </div>
+
+      <!-- Answer -->
+      <div class="answer-card" id="answer-card" hidden>
+        <div class="answer-header">
+          <span class="answer-icon">✦</span>
+          <span class="answer-title">통합 분석 결과</span>
+        </div>
+        <div class="answer-body markdown-body" id="answer-body"></div>
+      </div>
+
+      <!-- Chart -->
+      <div class="chart-card" id="chart-card" hidden>
+        <canvas id="result-chart"></canvas>
+      </div>
+
+      <!-- Citations -->
+      <div class="citations-card" id="citations-card" hidden>
+        <button class="citations-toggle" id="citations-toggle" aria-expanded="false">
+          <span class="toggle-icon">▶</span>
+          <span>인용 데이터 보기</span>
+          <span class="citations-count" id="citations-count"></span>
+        </button>
+        <div class="citations-body" id="citations-body" hidden></div>
+      </div>
+
+      <!-- Followup suggestions -->
+      <div class="followup-section" id="followup-section" hidden>
+        <span class="followup-label">후속 질문 제안</span>
+        <div class="followup-btns" id="followup-btns"></div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
